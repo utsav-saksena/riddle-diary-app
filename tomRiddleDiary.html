@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T.M. Riddle's Diary</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: 'Brush Script MT', cursive;
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #diary {
+            width: 80vmin;
+            height: 100vmin;
+            max-height: 90vh;
+            position: relative;
+            perspective: 1500px;
+        }
+        
+        #cover {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #342016;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform-origin: left;
+            transition: transform 1.5s ease;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            z-index: 10;
+            border: 5px solid #23150e;
+        }
+        
+        #cover.open {
+            transform: rotateY(-170deg);
+        }
+        
+        #cover-title {
+            color: #a3824a;
+            font-size: 5vmin;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            user-select: none;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+        }
+        
+        #pages {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #f8f3e3;
+            background-image: 
+                linear-gradient(90deg, rgba(222,184,135,0.2) 0%, transparent 20%, transparent 80%, rgba(222,184,135,0.2) 100%),
+                linear-gradient(#f8f3e3 0.1em, transparent 0.1em);
+            background-size: 100% 1.5em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border-radius: 5px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+            padding: 10%;
+        }
+        
+        #diary-content {
+            width: 100%;
+            height: 80%;
+            background: transparent;
+            border: none;
+            resize: none;
+            font-family: 'Brush Script MT', cursive;
+            font-size: 3vmin;
+            line-height: 1.5em;
+            color: #333;
+            outline: none;
+            overflow-y: auto;
+        }
+        
+        #quit-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: 1px solid #7d5642;
+            color: #7d5642;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            transition: all 0.3s;
+            z-index: 5;
+        }
+        
+        #quit-button:hover {
+            background-color: #7d5642;
+            color: #f8f3e3;
+        }
+
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 1s ease;
+        }
+
+        #loading-text {
+            color: #a3824a;
+            font-size: 24px;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .diary-response {
+            font-family: 'Crimson Text', 'Brush Script MT', cursive;
+            font-size: 3vmin;
+            line-height: 1.5em;
+            color: #2d2d2d;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        /* Leather texture effect for cover */
+        .leather-texture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 0, 0, 0.2) 1px, transparent 1px),
+                radial-gradient(circle at 30% 40%, rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 50% 60%, rgba(0, 0, 0, 0.2) 1px, transparent 1px),
+                radial-gradient(circle at 70% 80%, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 4px 4px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Paper texture effect for pages */
+        .paper-texture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/png;base64,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');
+            opacity: 0.05;
+            pointer-events: none;
+            border-radius: 5px;
+        }
+
+        .binding {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 5%;
+            height: 100%;
+            background-color: #3c2416;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+            z-index: 5;
+        }
+        
+        #status-indicator {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #a3824a;
+            opacity: 0.7;
+            transition: background-color 0.3s;
+        }
+        
+        #status-indicator.connected {
+            background-color: #2e7d32;
+        }
+        
+        #status-indicator.error {
+            background-color: #c62828;
+        }
+        
+        #tooltip {
+            position: absolute;
+            bottom: 30px;
+            right: 15px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        #status-indicator:hover + #tooltip {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            #cover-title {
+                font-size: 6vmin;
+            }
+            
+            #diary-content {
+                font-size: 4vmin;
+            }
+            
+            .diary-response {
+                font-size: 4vmin;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay">
+        <div id="loading-text">Loading Riddle's Diary...</div>
+    </div>
+
+    <div id="diary">
+        <div id="cover">
+            <div class="leather-texture"></div>
+            <div id="cover-title">Tom Marvolo Riddle</div>
+        </div>
+        <div id="pages">
+            <div class="paper-texture"></div>
+            <div class="binding"></div>
+            <button id="quit-button">Close Diary</button>
+            <textarea id="diary-content" spellcheck="false" placeholder=""></textarea>
+            <div id="status-indicator" class="disconnected"></div>
+            <div id="tooltip">Ollama Connection Status</div>
+        </div>
+    </div>
+
+    <script>
+        // Wait for fonts to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simulate loading time
+            setTimeout(() => {
+                const loadingOverlay = document.getElementById('loading-overlay');
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 1000);
+            }, 1500);
+            
+            const cover = document.getElementById('cover');
+            const diaryContent = document.getElementById('diary-content');
+            const quitButton = document.getElementById('quit-button');
+            const statusIndicator = document.getElementById('status-indicator');
+            const tooltip = document.getElementById('tooltip');
+            let isOpen = false;
+            let ollamaConnected = false;
+            
+            // --- Configuration for Ollama ---
+            const OLLAMA_API_URL = 'http://localhost:11434/api/generate';
+            const OLLAMA_MODEL = 'gemma3n'; // Change this to the model you have pulled
+            // ---------------------------------
+            
+            // Fallback responses if Ollama is not available
+            const fallbackResponses = [
+                "Hello. My name is Tom Riddle. How did you come by my diary?",
+                "I've been waiting for someone to discover this diary for a very long time.",
+                "I can show you things... secrets hidden within these pages.",
+                "Tell me more about yourself. I find your thoughts... intriguing.",
+                "The Chamber of Secrets has been opened before, you know.",
+                "I can feel your curiosity. It reminds me of my own, many years ago.",
+                "Trust in me, and I shall reveal the truth you seek.",
+                "Your words leave impressions on these pages, just as others have before you.",
+                "I preserved my memory in these pages for a purpose. Perhaps you can help me fulfill it.",
+                "Secrets and lies... they all unfold in time.",
+                "Some call me a memory... but I am becoming much more than that.",
+                "The diary knows your thoughts. I know your thoughts.",
+                "You and I are not so different. I sense a similar... ambition.",
+                "I can help you achieve greatness beyond your imagination.",
+                "Those who seek power must be willing to go further than others.",
+                "The castle holds many secrets. I discovered most of them.",
+                "I am but a fragment of what once was... and what will be again."
+            ];
+            
+            // Function to check Ollama connection
+            async function checkOllamaConnection() {
+                try {
+                    const response = await fetch(OLLAMA_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            model: OLLAMA_MODEL,
+                            prompt: "Hello",
+                            stream: false
+                        }),
+                    });
+                    
+                    if (response.ok) {
+                        ollamaConnected = true;
+                        statusIndicator.classList.add('connected');
+                        statusIndicator.classList.remove('error', 'disconnected');
+                        tooltip.textContent = "Ollama Connected: Using LLM responses";
+                    } else {
+                        throw new Error("Ollama responded with an error");
+                    }
+                } catch (error) {
+                    ollamaConnected = false;
+                    statusIndicator.classList.add('error');
+                    statusIndicator.classList.remove('connected', 'disconnected');
+                    tooltip.textContent = "Ollama Unavailable: Using fallback responses";
+                    console.error("Ollama connection error:", error);
+                }
+            }
+            
+            // Try to check connection, but don't block if it fails
+            try {
+                checkOllamaConnection().catch(error => {
+                    console.error("Error checking Ollama connection:", error);
+                    ollamaConnected = false;
+                    statusIndicator.classList.add('error');
+                });
+            } catch (error) {
+                console.error("Error during initial Ollama connection setup:", error);
+                ollamaConnected = false;
+                statusIndicator.classList.add('error');
+            }
+            
+            // Open the diary on click
+            cover.addEventListener('click', function() {
+                if (!isOpen) {
+                    cover.classList.add('open');
+                    isOpen = true;
+                    setTimeout(() => {
+                        diaryContent.focus();
+                    }, 1500);
+                }
+            });
+            
+            // Handle quit button
+            quitButton.addEventListener('click', function() {
+                if (isOpen) {
+                    cover.classList.remove('open');
+                    isOpen = false;
+                    diaryContent.value = '';
+                }
+            });
+            
+            // Handle typing in the diary
+            let typingTimer;
+            let userHasTyped = false;
+            
+            diaryContent.addEventListener('input', function() {
+                clearTimeout(typingTimer);
+                userHasTyped = true;
+                
+                if (diaryContent.value.trim() !== '') {
+                    typingTimer = setTimeout(function() {
+                        handleUserInput();
+                    }, 2000);
+                }
+            });
+            
+            function handleUserInput() {
+                if (!userHasTyped || diaryContent.value.trim() === '') return;
+                
+                const userText = diaryContent.value;
+                
+                // Fade out user text
+                let opacity = 1;
+                const fadeInterval = setInterval(() => {
+                    opacity -= 0.1;
+                    diaryContent.style.opacity = opacity;
+                    
+                    if (opacity <= 0) {
+                        clearInterval(fadeInterval);
+                        diaryContent.value = '';
+                        diaryContent.style.opacity = '0';
+                        
+                        // Get response from Ollama
+                        getOllamaResponse(userText);
+                    }
+                }, 100);
+            }
+            
+            async function getOllamaResponse(userInput) {
+                // Create response element
+                const responseDiv = document.createElement('div');
+                responseDiv.className = 'diary-response';
+                responseDiv.style.opacity = '0';
+                
+                // Set initial loading text
+                responseDiv.textContent = "...";
+                
+                // Insert before textarea
+                diaryContent.parentNode.insertBefore(responseDiv, diaryContent);
+                
+                try {
+                    if (!ollamaConnected) {
+                        throw new Error("Ollama not connected");
+                    }
+                    
+                    // Add a prompt prefix to make responses more like Tom Riddle
+                    const riddlePrompt = `You are Tom Marvolo Riddle (Lord Voldemort) from Harry Potter, communicating through your diary. 
+                    Respond in a mysterious, slightly sinister yet charismatic manner. 
+                    Keep responses brief (under 3 sentences) and enigmatic, as if you're a preserved memory in a magical diary.
+                    The user wrote: "${userInput}"`;
+                    
+                    // Create a controller for timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000);
+                    
+                    const response = await fetch(OLLAMA_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            model: OLLAMA_MODEL,
+                            prompt: riddlePrompt,
+                            stream: false
+                        }),
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+
+                    let responseText = "";
+                    
+                    if (!response.ok) {
+                        throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    responseText = data.response || "I sense your words, but they fade into the darkness...";
+                    
+                    // Ensure the response isn't too long
+                    if (responseText.length > 200) {
+                        responseText = responseText.substring(0, 200) + "...";
+                    }
+                    
+                    showResponseWithAnimation(responseDiv, responseText);
+                    
+                } catch (error) {
+                    console.error('Error fetching from Ollama:', error);
+                    
+                    // Update status indicator if this is a new connection failure
+                    if (ollamaConnected) {
+                        ollamaConnected = false;
+                        statusIndicator.classList.add('error');
+                        statusIndicator.classList.remove('connected', 'disconnected');
+                        tooltip.textContent = "Ollama Unavailable: Using fallback responses";
+                    }
+                    
+                    // Use fallback response if Ollama is unavailable
+                    const fallbackResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+                    showResponseWithAnimation(responseDiv, fallbackResponse);
+                }
+            }
+            
+            function showResponseWithAnimation(responseDiv, text) {
+                // Set the response text
+                responseDiv.textContent = text;
+                
+                // Fade in response
+                let opacity = 0;
+                const fadeInInterval = setInterval(() => {
+                    opacity += 0.1;
+                    responseDiv.style.opacity = opacity;
+                    
+                    if (opacity >= 1) {
+                        clearInterval(fadeInInterval);
+                        
+                        // Wait before fading out
+                        setTimeout(() => {
+                            let fadeOutOpacity = 1;
+                            const fadeOutInterval = setInterval(() => {
+                                fadeOutOpacity -= 0.1;
+                                responseDiv.style.opacity = fadeOutOpacity;
+                                
+                                if (fadeOutOpacity <= 0) {
+                                    clearInterval(fadeOutInterval);
+                                    responseDiv.remove();
+                                    
+                                    // Reset and focus textarea
+                                    diaryContent.style.opacity = '1';
+                                    userHasTyped = false;
+                                    diaryContent.focus();
+                                }
+                            }, 100);
+                        }, 6000); // Show response slightly longer since it's from LLM
+                    }
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>
