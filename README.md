@@ -43,3 +43,8 @@ This is a fun emulation of that diary which runs in your brower.
 ## How I made this 
 One evening's worth of 'vibecoding' with Anthropic's Claude Haiku 3.5 and Google's Gemini 2.5 Flash! 
 
+## Legal Disclaimer
+This project, "T.M. Riddle's Diary" is an independent, non-commercial, open-source application created by fans, for fans. It
+is not affiliated with, endorsed by, or connected to J.K. Rowling, Warner Bros., or any official Harry Potter entities.
+All trademarks, characters, and related materials are the property of their respective owners. 
+This project is intended for personal, educational, and entertainment purposes only. No copyright or trademark infringement is intended. 
