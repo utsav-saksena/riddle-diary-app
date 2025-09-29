@@ -5,7 +5,9 @@ Remember Tom Marvolo's mysterious diary from the Harry Potter and the Chamber of
 
 This is a fun emulation of that diary which runs in your brower. 
 
+![Diary Cover](https://github.com/utsav-saksena/riddle-diary-app/blob/main/DiaryCover.png)
 
+![Inside the Diary](https://github.com/utsav-saksena/riddle-diary-app/blob/main/OpenDiaryDefaultResponse.png)
 
 
 ## Features
@@ -39,5 +41,5 @@ This is a fun emulation of that diary which runs in your brower.
 - DO NOT browse the internet using the same browser session that you run the app.
 
 ## How I made this 
-One evening's worth of vibecoding with Anthropic's Claude Haiku 3.5 and Google's Gemini 2.5 Flash! <3  
+One evening's worth of 'vibecoding' with Anthropic's Claude Haiku 3.5 and Google's Gemini 2.5 Flash! 
 
