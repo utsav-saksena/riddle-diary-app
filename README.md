@@ -32,6 +32,7 @@ This is a fun emulation of that diary which runs in your brower.
   ollama serve 
   ```
 - Since this is a front-end only app (i.e. no server involved), you'll have to disable Chrome's same origin policy.
+- Download the 'tomRiddleDiary.html' file. 
 - To do this safely, navigate to the directory where you've downloaded the .html file, and type in the following: 
   ```
   google-chrome --user-data-dir=/tmp/chrome_dev_test --disable-web-security tomRiddleDiary.html &
